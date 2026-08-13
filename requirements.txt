@@ -1,0 +1,4 @@
+pywebview
+pyserial
+pdfplumber
+openpyxl
