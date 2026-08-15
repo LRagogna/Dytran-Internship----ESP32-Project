@@ -222,22 +222,6 @@ The included `.spec` file packages the Python application and web interface into
 - CSV and Excel data processing
 - System integration, troubleshooting, and technical documentation
 
-## Privacy and publication notice
-
-Only sanitized demonstration data should be committed to this public repository. Do not upload:
-
-- Actual Job Travelers or manufacturing instructions
-- Company part, drawing, fixture, or work-order numbers
-- Customer information
-- Production measurements or proprietary process parameters
-- Credentials, tokens, serial numbers, or internal network information
-- Photographs containing GPS or other sensitive metadata
-
-Strip image metadata before committing photographs, and review the full Git history if sensitive material was ever committed and later deleted.
-
-## Project status
-
-The project reached a functional integrated-prototype stage: the hardware terminal, embedded firmware, desktop interface, serial transfer, local timing workflow, CSV storage, and Excel export were brought together into a complete working system.
 
 ## Author
 
