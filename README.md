@@ -2,6 +2,38 @@
 
 An end-to-end engineering project that turns production instructions into portable, operator-controlled time studies. The system combines a battery-powered ESP32 terminal, custom electronics and enclosure design, embedded firmware, and a Windows desktop application for creating, recording, reviewing, and exporting study data.
 
+## Demo
+
+[▶ Watch the ESP32 Time-Study System demo video](Pictures/esp32_time_study_demo.mp4)
+
+The demo shows the completed handheld prototype running the on-device study workflow, including study selection, step navigation, and operator-controlled timing.
+
+## Final prototype
+
+The completed system packages the ESP32, display, physical controls, battery hardware, and interface electronics into a portable 3D-printed enclosure.
+
+![Completed ESP32 time-study prototype](Pictures/device_prototype_overview.jpg)
+
+### On-device study selection
+
+Stored studies can be selected directly from the handheld device before beginning a timing session.
+
+![ESP32 study selection interface](Pictures/device_study_selection.jpg)
+
+### Step timing workflow
+
+The display presents the current operation while the physical controls allow the operator to record time and move between steps.
+
+![ESP32 timing interface step 1](Pictures/device_timing_step1.jpg)
+
+![ESP32 timing interface step 2](Pictures/device_timing_step2.jpg)
+
+### Internal electronics
+
+The enclosure integrates the ESP32 development board, battery system, wiring, display interface, switches, and supporting electronics into a self-contained unit.
+
+![ESP32 prototype internal electronics](Pictures/device_internal_electronics.jpg)
+
 ## Engineering outcome
 
 This project replaced a centralized, manually coordinated timing process with a portable workflow that can be used directly at the workstation. A single system now supports the full path from study creation to recorded results:
@@ -53,7 +85,7 @@ flowchart TD
 
 The schematic includes provisions for decoupling capacitors and a buzzer. Those components were not installed on the final prototype after evaluation of the implemented design requirements.
 
-## Engineering visuals
+## Engineering design visuals
 
 ### System schematic
 
@@ -128,7 +160,7 @@ This format keeps the device implementation lightweight while making the results
 ├── ESP32 Study Manager.spec       # PyInstaller build configuration
 ├── build.bat                      # Windows build helper
 ├── requirements.txt               # Python dependencies
-├── Pictures/                      # Sanitized project images
+├── Pictures/                      # Sanitized project images and demo video
 ├── Hardware Info.docx             # Hardware operation reference
 ├── Project Materials.docx         # Project bill of materials
 └── User Guide - Sensitive Info. Removed.docx
