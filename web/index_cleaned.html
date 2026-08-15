@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ESP32 Study Manager</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: #f5f6f8;
+    color: #1f2937;
+}
+
+.topbar {
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.brand {
+    padding: 22px 30px 14px;
+}
+
+.brand h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.brand p {
+    margin: 6px 0 0;
+    color: #6b7280;
+}
+
+.tabs {
+    display: flex;
+    gap: 30px;
+    padding: 0 30px;
+}
+
+.tab {
+    padding: 14px 2px;
+    cursor: pointer;
+    color: #6b7280;
+    font-weight: 600;
+    border-bottom: 3px solid transparent;
+}
+
+.tab.active {
+    color: #111827;
+    border-bottom-color: #111827;
+}
+
+.page {
+    display: none;
+    padding: 28px;
+}
+
+.page.active { display: block; }
+
+.card {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
+.card h2 {
+    margin: 0 0 18px;
+    font-size: 18px;
+}
+
+button {
+    border: none;
+    background: #111827;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button.secondary {
+    background: #e5e7eb;
+    color: #111827;
+}
+
+button.danger {
+    background: #dc2626;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+input[type="text"] {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.device-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.status-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.status-dot.connected { background: #16a34a; }
+.status-dot.disconnected { background: #dc2626; }
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.info-box {
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+
+.info-label {
+    color: #6b7280;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.info-value { font-weight: 600; }
+
+.upload-box {
+    border: 2px dashed #d1d5db;
+    border-radius: 10px;
+    padding: 35px;
+    text-align: center;
+}
+
+.form-row { margin: 18px 0; }
+
+.step-preview {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 430px;
+    overflow-y: auto;
+}
+
+.step-row {
+    display: grid;
+    grid-template-columns: 70px 1fr auto;
+    gap: 12px;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eeeeee;
+    align-items: start;
+}
+
+.step-number {
+    font-weight: 600;
+    padding-top: 8px;
+}
+
+.step-controls {
+    display: flex;
+    gap: 6px;
+    padding-top: 4px;
+}
+
+.step-btn {
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 9px;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.step-btn:hover { background: #d1d5db; }
+
+.step-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.step-btn.remove:hover {
+    background: #fecaca;
+    color: #b91c1c;
+}
+
+.add-step-row { margin-top: 14px; }
+
+.step-edit {
+    width: 100%;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #1f2937;
+    background: #f9fafb;
+    resize: none;
+    overflow: hidden;
+}
+
+.step-edit:hover {
+    border-color: #d1d5db;
+}
+
+.step-edit:focus {
+    outline: none;
+    border-color: #111827;
+    background: white;
+}
+
+.csv-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 18px;
+}
+
+.file-list {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.file-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+}
+
+.file-item {
+    padding: 13px 16px;
+    border-bottom: 1px solid #eeeeee;
+    cursor: pointer;
+}
+
+.file-item:hover { background: #f9fafb; }
+.file-item.active { background: #eef2ff; }
+
+.preview {
+    background: white;
+    border: 1px solid #e1e4e8;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 420px;
+}
+
+.preview-header {
+    padding: 16px 18px;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.preview-header h3 { margin: 0; }
+
+.table-container {
+    overflow: auto;
+    max-height: 500px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 11px;
+    text-align: left;
+    border-bottom: 1px solid #eeeeee;
+    vertical-align: top;
+}
+
+th {
+    background: #f9fafb;
+    position: sticky;
+    top: 0;
+}
+
+.placeholder {
+    padding: 45px;
+    text-align: center;
+    color: #9ca3af;
+}
+
+.delete-warning { color: #6b7280; }
+
+.export-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 4px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.message { margin-top: 15px; }
+.success { color: #15803d; }
+.error { color: #b91c1c; }
+
+@media (max-width: 800px) {
+    .csv-layout { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="brand">
+        <h1>ESP32 Study Manager</h1>
+        <p>Create, view, download and export time studies.</p>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('home', this)">Home</div>
+        <div class="tab" onclick="switchTab('create', this)">Create Study</div>
+        <div class="tab" onclick="switchTab('csv', this)">Current Studies</div>
+        <div class="tab" onclick="switchTab('export', this)">Export</div>
+    </div>
+</div>
+
+
+<!-- HOME -->
+<div id="home" class="page active">
+
+    <div class="card">
+        <h2>How this app works</h2>
+
+        <p style="color:#4b5563;line-height:1.6;margin:0 0 14px;">
+            This app manages time studies stored on a connected ESP32 device.
+            Connect the ESP32 over USB and the app talks to it automatically.
+        </p>
+
+        <ol style="color:#4b5563;line-height:1.7;margin:0;padding-left:20px;">
+            <li>
+                <strong>Create Study</strong> — choose a Job Traveler PDF. The
+                app reads its steps, then you enter the part number and work
+                order number and upload the study to the ESP32 as a CSV file.
+            </li>
+            <li>
+                <strong>Current Studies</strong> — browse the CSV studies stored
+                on the device, preview any of them, download a copy, or delete
+                one.
+            </li>
+            <li>
+                <strong>Export</strong> — select one or more studies and save
+                them into a single Excel workbook, one worksheet per study.
+            </li>
+        </ol>
+
+        <p style="color:#6b7280;margin:14px 0 0;">
+            Each study is saved on the ESP32 using the naming convention
+            <strong>&lt;part number&gt;_&lt;work order number&gt;.csv</strong>.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Device</h2>
+
+        <div class="device-status">
+            <span id="statusDot" class="status-dot disconnected"></span>
+            <span id="statusText">Searching for device...</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Device Information</h2>
+
+        <div class="info-grid">
+            <div class="info-box">
+                <div class="info-label">Port</div>
+                <div id="infoPort" class="info-value">—</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">USB Device</div>
+                <div id="infoDevice" class="info-value">—</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Manufacturer</div>
+                <div id="infoManufacturer" class="info-value">—</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Stored CSV Files</div>
+                <div id="infoFileCount" class="info-value">—</div>
+            </div>
+
+            <div class="info-box">
+                <div class="info-label">Baud Rate</div>
+                <div class="info-value">115200</div>
+            </div>
+        </div>
+
+        <div style="margin-top:18px;">
+            <button onclick="refreshEverything()">Refresh Device</button>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- CREATE STUDY -->
+<div id="create" class="page">
+
+    <div class="card">
+        <h2>Create Study</h2>
+
+        <p style="color:#6b7280;">
+            Choose a Job Traveler PDF. The app parses its steps first, then uploads
+            the study structure to the connected ESP32.
+        </p>
+
+        <div class="upload-box">
+            <div style="font-size:32px;margin-bottom:10px;">📄</div>
+            <strong>Job Traveler PDF</strong>
+
+            <div style="margin-top:15px;">
+                <button onclick="uploadJT()">Choose JT PDF</button>
+            </div>
+
+            <div id="jtFilename" style="margin-top:12px;color:#6b7280;">
+                No file selected
+            </div>
+        </div>
+
+        <div id="studyForm" style="display:none;">
+
+            <div class="form-row">
+                <label for="partNumber">
+                    <strong>Part number</strong>
+                    <span style="color:#dc2626;">*</span>
+                </label>
+                <div style="margin-top:7px;">
+                    <input id="partNumber" type="text"
+                           placeholder="e.g. DEMO-001"
+                           oninput="updateFilenamePreview()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="workOrder">
+                    <strong>Work order number</strong>
+                    <span style="color:#dc2626;">*</span>
+                </label>
+                <div style="margin-top:7px;">
+                    <input id="workOrder" type="text"
+                           placeholder="e.g. 10001"
+                           oninput="updateFilenamePreview()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label for="customName">
+                    <strong>Custom name</strong>
+                    <span style="color:#6b7280;font-weight:normal;">
+                        (optional)
+                    </span>
+                </label>
+                <div style="margin-top:7px;">
+                    <input id="customName" type="text"
+                           placeholder="Leave blank to use the default name"
+                           oninput="updateFilenamePreview()">
+                </div>
+                <div style="margin-top:6px;color:#6b7280;font-size:13px;">
+                    If set, this becomes the study name instead of the
+                    default part number / work order name.
+                </div>
+            </div>
+
+            <div class="form-row" style="color:#6b7280;">
+                The study will be saved on the ESP32 as
+                <strong id="filenamePreview">&lt;part&gt;_&lt;WO&gt;.csv</strong>
+            </div>
+
+            <div class="form-row">
+                <strong id="stepCount">Parsed Steps</strong>
+                <span style="color:#6b7280;font-size:13px;margin-left:8px;">
+                    Click any description to edit it before uploading.
+                </span>
+            </div>
+
+            <div id="stepPreview" class="step-preview"></div>
+
+            <div class="add-step-row">
+                <button class="secondary" type="button" onclick="addStep()">
+                    + Add Step
+                </button>
+            </div>
+
+            <div style="margin-top:20px;">
+                <button id="createStudyButton" onclick="createStudy()">
+                    Create Study on ESP32
+                </button>
+            </div>
+
+            <div id="createMessage" class="message"></div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- CSV FILES -->
+<div id="csv" class="page">
+
+    <div class="csv-layout">
+
+        <div class="file-list">
+            <div class="file-list-header">
+                <span>Current Studies</span>
+                <button class="secondary" onclick="loadFiles()">Refresh</button>
+            </div>
+
+            <div id="csvFileList">
+                <div class="placeholder">Loading...</div>
+            </div>
+        </div>
+
+        <div>
+
+            <div class="preview">
+                <div class="preview-header">
+                    <h3 id="previewTitle">CSV Preview</h3>
+
+                    <button
+                        id="downloadButton"
+                        onclick="downloadCurrentCSV()"
+                        style="display:none;">
+                        Download CSV
+                    </button>
+                </div>
+
+                <div id="csvPreview" class="placeholder">
+                    Select a CSV file to preview it.
+                </div>
+            </div>
+
+            <div class="card" style="margin-top:18px;">
+                <h2>Delete File</h2>
+
+                <p class="delete-warning">
+                    Permanently delete the selected CSV from the ESP32. This action
+                    requires two confirmations and cannot be undone.
+                </p>
+
+                <p>
+                    Selected file:
+                    <strong id="deleteFilename">None</strong>
+                </p>
+
+                <button
+                    id="deleteFileButton"
+                    class="danger"
+                    onclick="beginDelete()"
+                    disabled>
+                    Delete Selected File
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<!-- EXPORT -->
+<div id="export" class="page">
+
+    <div class="card">
+        <h2>Export to Excel</h2>
+
+        <p style="color:#6b7280;">
+            Select one or more studies. Each selected CSV becomes its own worksheet
+            in the Excel workbook.
+        </p>
+
+        <div id="exportFiles"></div>
+
+        <div style="margin-top:20px;display:flex;justify-content:space-between;">
+            <label>
+                <input id="selectAll" type="checkbox" onchange="toggleAll(this)">
+                Select all
+            </label>
+
+            <button onclick="exportExcel()">Export Excel</button>
+        </div>
+
+        <div id="exportMessage" class="message"></div>
+    </div>
+
+</div>
+
+
+<script>
+let csvFiles = [];
+let currentCSV = null;
+let parsedSteps = [];
+
+
+function switchTab(name, element) {
+    document.querySelectorAll(".page").forEach(page => {
+        page.classList.remove("active");
+    });
+
+    document.querySelectorAll(".tab").forEach(tab => {
+        tab.classList.remove("active");
+    });
+
+    document.getElementById(name).classList.add("active");
+    element.classList.add("active");
+
+    if (name === "csv" || name === "export") {
+        loadFiles();
+    }
+}
+
+
+async function refreshDevice() {
+    const result = await window.pywebview.api.find_esp32();
+
+    const dot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+
+    if (!result.success) {
+        dot.className = "status-dot disconnected";
+        statusText.innerText = "No ESP32 connected";
+
+        document.getElementById("infoPort").innerText = "—";
+        document.getElementById("infoDevice").innerText = "—";
+        document.getElementById("infoManufacturer").innerText = "—";
+
+        return;
+    }
+
+    dot.className = "status-dot connected";
+    statusText.innerText = `Connected — ${result.port}`;
+
+    document.getElementById("infoPort").innerText = result.port;
+    document.getElementById("infoDevice").innerText = result.description;
+    document.getElementById("infoManufacturer").innerText = result.manufacturer;
+}
+
+
+async function uploadJT() {
+    const result = await window.pywebview.api.choose_jt_pdf();
+
+    if (!result.success) {
+        if (!result.cancelled) {
+            alert(result.message);
+        }
+        return;
+    }
+
+    parsedSteps = result.steps;
+
+    document.getElementById("jtFilename").innerText = result.filename;
+
+    updateFilenamePreview();
+
+    document.getElementById("studyForm").style.display = "block";
+
+    renderJTSteps();
+
+    document.getElementById("createMessage").innerText = "";
+}
+
+
+function updateFilenamePreview() {
+    const part = document.getElementById("partNumber").value.trim();
+    const wo = document.getElementById("workOrder").value.trim();
+    const custom = document.getElementById("customName").value.trim();
+    const preview = document.getElementById("filenamePreview");
+
+    if (custom) {
+        const base = custom.toLowerCase().endsWith(".csv")
+            ? custom.slice(0, -4)
+            : custom;
+        preview.innerText = `${base}.csv`;
+    } else if (part || wo) {
+        preview.innerText = `${part || "<part>"}_${wo || "<WO>"}.csv`;
+    } else {
+        preview.innerText = "<part>_<WO>.csv";
+    }
+}
+
+
+function autoResize(textarea) {
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+}
+
+
+function renderJTSteps() {
+    const container = document.getElementById("stepPreview");
+    container.innerHTML = "";
+
+    parsedSteps.forEach((step, index) => {
+        step.number = index + 1;
+
+        const row = document.createElement("div");
+        row.className = "step-row";
+
+        const number = document.createElement("div");
+        number.className = "step-number";
+        number.innerText = `Step ${step.number}`;
+
+        const editor = document.createElement("textarea");
+        editor.className = "step-edit";
+        editor.rows = 1;
+        editor.value = step.description;
+
+        editor.addEventListener("input", () => {
+            parsedSteps[index].description = editor.value;
+            autoResize(editor);
+        });
+
+        const controls = document.createElement("div");
+        controls.className = "step-controls";
+
+        const up = document.createElement("button");
+        up.className = "step-btn";
+        up.type = "button";
+        up.innerText = "↑";
+        up.title = "Move up";
+        up.disabled = index === 0;
+        up.onclick = () => moveStep(index, -1);
+
+        const down = document.createElement("button");
+        down.className = "step-btn";
+        down.type = "button";
+        down.innerText = "↓";
+        down.title = "Move down";
+        down.disabled = index === parsedSteps.length - 1;
+        down.onclick = () => moveStep(index, 1);
+
+        const remove = document.createElement("button");
+        remove.className = "step-btn remove";
+        remove.type = "button";
+        remove.innerText = "✕";
+        remove.title = "Remove step";
+        remove.onclick = () => removeStep(index);
+
+        controls.appendChild(up);
+        controls.appendChild(down);
+        controls.appendChild(remove);
+
+        row.appendChild(number);
+        row.appendChild(editor);
+        row.appendChild(controls);
+        container.appendChild(row);
+
+        autoResize(editor);
+    });
+
+    const count = parsedSteps.length;
+    document.getElementById("stepCount").innerText =
+        `${count} step${count === 1 ? "" : "s"}`;
+}
+
+
+function moveStep(index, delta) {
+    const target = index + delta;
+
+    if (target < 0 || target >= parsedSteps.length) {
+        return;
+    }
+
+    const direction = delta < 0 ? "up" : "down";
+
+    if (!confirm(`Move Step ${index + 1} ${direction}?`)) {
+        return;
+    }
+
+    const moved = parsedSteps[index];
+    parsedSteps[index] = parsedSteps[target];
+    parsedSteps[target] = moved;
+
+    renderJTSteps();
+}
+
+
+function removeStep(index) {
+    const description = String(parsedSteps[index].description || "").trim();
+    const preview = description.length > 80
+        ? description.slice(0, 80) + "…"
+        : description;
+
+    const message = preview
+        ? `Remove Step ${index + 1}?\n\n"${preview}"`
+        : `Remove Step ${index + 1}?`;
+
+    if (!confirm(message)) {
+        return;
+    }
+
+    parsedSteps.splice(index, 1);
+    renderJTSteps();
+}
+
+
+function addStep() {
+    parsedSteps.push({
+        number: parsedSteps.length + 1,
+        description: "",
+    });
+
+    renderJTSteps();
+
+    const editors = document.querySelectorAll("#stepPreview .step-edit");
+    const last = editors[editors.length - 1];
+
+    if (last) {
+        last.focus();
+        last.scrollIntoView({ block: "nearest" });
+    }
+}
+
+
+async function createStudy() {
+    const partNumber = document.getElementById("partNumber").value.trim();
+    const workOrder = document.getElementById("workOrder").value.trim();
+    const customName = document.getElementById("customName").value.trim();
+    const message = document.getElementById("createMessage");
+    const button = document.getElementById("createStudyButton");
+
+    if (!partNumber) {
+        message.className = "message error";
+        message.innerText = "Part number is required.";
+        return;
+    }
+
+    if (!workOrder) {
+        message.className = "message error";
+        message.innerText = "Work order number is required.";
+        return;
+    }
+
+    if (!parsedSteps.length) {
+        message.className = "message error";
+        message.innerText = "Add at least one step before creating the study.";
+        return;
+    }
+
+    const blankIndex = parsedSteps.findIndex(
+        step => !String(step.description).trim()
+    );
+
+    if (blankIndex !== -1) {
+        message.className = "message error";
+        message.innerText =
+            `Step ${blankIndex + 1} has an empty description.`;
+        return;
+    }
+
+    button.disabled = true;
+    message.className = "message";
+    message.innerText = "Creating study on ESP32...";
+
+    const result = await window.pywebview.api.create_study(
+        partNumber,
+        workOrder,
+        customName,
+        parsedSteps
+    );
+
+    button.disabled = false;
+
+    if (!result.success) {
+        message.className = "message error";
+        message.innerText = result.message;
+        return;
+    }
+
+    message.className = "message success";
+    message.innerText =
+        `${result.filename} created with ${result.step_count} steps.`;
+
+    await loadFiles();
+}
+
+
+async function loadFiles() {
+    const result = await window.pywebview.api.get_csv_files();
+
+    if (!result.success) {
+        csvFiles = [];
+
+        document.getElementById("csvFileList").innerHTML =
+            `<div class="placeholder">${escapeHTML(result.message)}</div>`;
+
+        document.getElementById("infoFileCount").innerText = "—";
+        renderExportFiles();
+
+        return;
+    }
+
+    csvFiles = result.files;
+    document.getElementById("infoFileCount").innerText = csvFiles.length;
+
+    renderCSVFiles();
+    renderExportFiles();
+}
+
+
+function renderCSVFiles() {
+    const container = document.getElementById("csvFileList");
+
+    if (!csvFiles.length) {
+        container.innerHTML =
+            `<div class="placeholder">No CSV files found.</div>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    csvFiles.forEach(filename => {
+        const item = document.createElement("div");
+        item.className = "file-item";
+        item.innerHTML = `📄 ${escapeHTML(filename)}`;
+
+        item.onclick = () => openCSV(filename, item);
+
+        container.appendChild(item);
+    });
+}
+
+
+async function openCSV(filename, element) {
+    document.querySelectorAll(".file-item").forEach(item => {
+        item.classList.remove("active");
+    });
+
+    element.classList.add("active");
+
+    const preview = document.getElementById("csvPreview");
+    preview.className = "placeholder";
+    preview.innerText = "Loading CSV...";
+
+    const result = await window.pywebview.api.read_csv(filename);
+
+    if (!result.success) {
+        preview.innerText = result.message;
+        return;
+    }
+
+    currentCSV = filename;
+
+    document.getElementById("previewTitle").innerText =
+        `${filename} · ${result.row_count} steps`;
+
+    document.getElementById("downloadButton").style.display = "block";
+    document.getElementById("deleteFilename").innerText = filename;
+    document.getElementById("deleteFileButton").disabled = false;
+
+    renderCSVTable(result.headers, result.rows);
+}
+
+
+function renderCSVTable(headers, rows) {
+    const container = document.getElementById("csvPreview");
+    container.className = "table-container";
+
+    let html = "<table><thead><tr>";
+
+    headers.forEach(header => {
+        html += `<th>${escapeHTML(header)}</th>`;
+    });
+
+    html += "</tr></thead><tbody>";
+
+    rows.forEach(row => {
+        html += "<tr>";
+
+        row.forEach(value => {
+            html += `<td>${escapeHTML(value)}</td>`;
+        });
+
+        html += "</tr>";
+    });
+
+    html += "</tbody></table>";
+
+    container.innerHTML = html;
+}
+
+
+async function downloadCurrentCSV() {
+    if (!currentCSV) {
+        return;
+    }
+
+    const result = await window.pywebview.api.download_csv(currentCSV);
+
+    if (result.success) {
+        alert(`CSV saved successfully:\n\n${result.path}`);
+    } else if (!result.cancelled) {
+        alert(result.message);
+    }
+}
+
+
+async function beginDelete() {
+    if (!currentCSV) {
+        return;
+    }
+
+    const first = confirm(
+        `Delete "${currentCSV}" from the ESP32?\n\n` +
+        `This permanently removes the study.`
+    );
+
+    if (!first) {
+        return;
+    }
+
+    const typed = prompt(
+        `FINAL CONFIRMATION\n\n` +
+        `Type the exact filename below to delete it:\n\n` +
+        currentCSV
+    );
+
+    if (typed === null) {
+        return;
+    }
+
+    if (typed.trim() !== currentCSV) {
+        alert("Filename did not match. Nothing was deleted.");
+        return;
+    }
+
+    const result = await window.pywebview.api.delete_csv(currentCSV);
+
+    if (!result.success) {
+        alert(result.message);
+        return;
+    }
+
+    alert(`${currentCSV} was permanently deleted.`);
+
+    currentCSV = null;
+
+    document.getElementById("previewTitle").innerText = "CSV Preview";
+
+    const preview = document.getElementById("csvPreview");
+    preview.className = "placeholder";
+    preview.innerText = "Select a CSV file to preview it.";
+
+    document.getElementById("downloadButton").style.display = "none";
+    document.getElementById("deleteFilename").innerText = "None";
+    document.getElementById("deleteFileButton").disabled = true;
+
+    await loadFiles();
+}
+
+
+function renderExportFiles() {
+    const container = document.getElementById("exportFiles");
+
+    if (!csvFiles.length) {
+        container.innerHTML =
+            `<div class="placeholder">No CSV files available.</div>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    csvFiles.forEach(filename => {
+        const row = document.createElement("div");
+        row.className = "export-row";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "export-checkbox";
+        checkbox.value = filename;
+
+        const label = document.createElement("span");
+        label.innerText = `📄 ${filename}`;
+
+        row.appendChild(checkbox);
+        row.appendChild(label);
+
+        container.appendChild(row);
+    });
+}
+
+
+function toggleAll(source) {
+    document.querySelectorAll(".export-checkbox").forEach(box => {
+        box.checked = source.checked;
+    });
+}
+
+
+async function exportExcel() {
+    const selected = [];
+
+    document.querySelectorAll(".export-checkbox:checked").forEach(box => {
+        selected.push(box.value);
+    });
+
+    const message = document.getElementById("exportMessage");
+
+    if (!selected.length) {
+        message.className = "message error";
+        message.innerText = "Select at least one CSV file.";
+        return;
+    }
+
+    message.className = "message";
+    message.innerText = "Creating Excel workbook...";
+
+    const result = await window.pywebview.api.export_excel(selected);
+
+    if (result.success) {
+        message.className = "message success";
+        message.innerText = `Saved to ${result.path}`;
+    } else if (!result.cancelled) {
+        message.className = "message error";
+        message.innerText = result.message;
+    } else {
+        message.innerText = "";
+    }
+}
+
+
+function escapeHTML(value) {
+    const div = document.createElement("div");
+    div.textContent = value ?? "";
+    return div.innerHTML;
+}
+
+
+async function refreshEverything() {
+    await refreshDevice();
+    await loadFiles();
+}
+
+
+window.addEventListener("pywebviewready", refreshEverything);
+</script>
+
+</body>
+</html>
